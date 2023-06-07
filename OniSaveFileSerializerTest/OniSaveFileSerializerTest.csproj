@@ -20,4 +20,10 @@
     <ProjectReference Include="..\OniSaveFileSerializer\OniSaveFileSerializer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestData\Header\headerV7.31.save">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
