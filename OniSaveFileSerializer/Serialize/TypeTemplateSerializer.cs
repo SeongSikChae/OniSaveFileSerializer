@@ -27,24 +27,56 @@
 
     public sealed class TypeTemplateMemberSerializer : ISaveFileSerializer<TypeTemplateMember>
     {
+        public void Initialize(ISaveFileSerializer<TypeInfo> typeInfoSerializer)
+        {
+            this.typeInfoSerializer = typeInfoSerializer;
+            this.initialized = true;
+        }
+
+        private bool initialized = false;
+        private ISaveFileSerializer<TypeInfo>? typeInfoSerializer;
+
         public TypeTemplateMember Deserialize(byte[] buf)
         {
-            throw new NotImplementedException();
+            using MemoryStream memory = new MemoryStream(buf);
+            using BinaryReader reader = new BinaryReader(memory);
+            return Deserialize(reader);
         }
 
         public TypeTemplateMember Deserialize(BinaryReader reader)
         {
-            throw new NotImplementedException();
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeInfoSerializer is null)
+                throw new NullReferenceException("typeInfoSerializer is null");
+            string? name = reader.ReadKleiString();
+            name.ValidateDotNetIdentifierName();
+            TypeInfo typeInfo = typeInfoSerializer.Deserialize(reader);
+            return new TypeTemplateMember
+            {
+                Name = name,
+                Type = typeInfo,
+            };
         }
 
         public byte[] Serialize(TypeTemplateMember obj)
         {
-            throw new NotImplementedException();
+            using MemoryStream memory = new MemoryStream();
+            using BinaryWriter writer = new BinaryWriter(memory);
+            Serialize(writer, obj);
+            return memory.ToArray();
         }
 
         public void Serialize(BinaryWriter writer, TypeTemplateMember obj)
         {
-            throw new NotImplementedException();
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeInfoSerializer is null)
+                throw new NullReferenceException("typeInfoSerializer is null");
+            if (obj.Type is null)
+                throw new NullReferenceException("TypeInfo is null");
+            writer.WriteKleiString(obj.Name);
+            typeInfoSerializer.Serialize(writer, obj.Type);
         }
     }
 

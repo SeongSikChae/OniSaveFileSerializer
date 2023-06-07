@@ -12,4 +12,9 @@
 
         T Deserialize(BinaryReader reader);
     }
+
+    public sealed class NotInitializedException : Exception
+    {
+        public NotInitializedException(string message, Exception? innerException = null) : base(message, innerException) { }
+    }
 }

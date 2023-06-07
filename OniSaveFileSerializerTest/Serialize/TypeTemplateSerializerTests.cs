@@ -4,11 +4,82 @@ using System.Security.Cryptography;
 namespace OniSaveFileSerializer.Serialize.Tests
 {
     using Structure;
-    using System.Reflection.PortableExecutable;
 
     [TestClass]
     public class TypeTemplateSerializerTests
     {
+    }
+
+    [TestClass]
+    public class TypeTemplateMemberSerializerTests
+    {
+        [TestMethod]
+        public void InitializeTest()
+        {
+            TypeTemplateMemberSerializer serializer = new TypeTemplateMemberSerializer();
+            Assert.ThrowsException<NotInitializedException>(() =>
+            {
+                serializer.Serialize(new TypeTemplateMember
+                {
+                    Name = "Test",
+                    Type = new TypeInfo
+                    {
+                        Info = SerializationTypeInfo.IS_VALUE_TYPE,
+                        TemplateName = "ModInfo"
+                    }
+                });
+            });
+        }
+
+        [TestMethod]
+        public void SerializeAndDeserializeTest()
+        {
+            TypeTemplateMemberSerializer serializer = new TypeTemplateMemberSerializer();
+            serializer.Initialize(new DummyTypeInfoSerializer());
+            byte[] block1 = serializer.Serialize(new TypeTemplateMember
+            {
+                Name = "Test",
+                Type = new TypeInfo
+                {
+                    Info = SerializationTypeInfo.IS_VALUE_TYPE,
+                    TemplateName = "ModInfo"
+                }
+            });
+
+            TypeTemplateMember member = serializer.Deserialize(block1);
+            Assert.AreEqual("Test", member.Name);
+            Assert.IsNotNull(member.Type);
+            Assert.AreEqual(SerializationTypeInfo.IS_VALUE_TYPE, member.Type.Info);
+            Assert.AreEqual("ModInfo", member.Type.TemplateName);
+        }
+
+        private sealed class DummyTypeInfoSerializer : ISaveFileSerializer<TypeInfo>
+        {
+            public TypeInfo Deserialize(byte[] buf)
+            {
+                throw new NotImplementedException();
+            }
+
+            public TypeInfo Deserialize(BinaryReader reader)
+            {
+                return new TypeInfo
+                {
+                    Info = SerializationTypeInfo.IS_VALUE_TYPE,
+                    TemplateName = "ModInfo"
+                };
+            }
+
+            public byte[] Serialize(TypeInfo obj)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Serialize(BinaryWriter writer, TypeInfo obj)
+            {
+                writer.Write((byte)obj.Info);
+                writer.WriteKleiString(obj.TemplateName);
+            }
+        }
     }
 
     [TestClass]
