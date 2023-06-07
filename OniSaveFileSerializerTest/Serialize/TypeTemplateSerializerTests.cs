@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 namespace OniSaveFileSerializer.Serialize.Tests
 {
     using Structure;
+    using System.Reflection.PortableExecutable;
 
     [TestClass]
     public class TypeTemplateSerializerTests
@@ -65,6 +66,26 @@ namespace OniSaveFileSerializer.Serialize.Tests
                 string actualHash = Convert.ToBase64String(sha.ComputeHash(actual));
                 Assert.AreEqual(expectedHash, actualHash);
             }
+        }
+
+        [TestMethod]
+        public void SerializeTest2()
+        {
+            byte[] expected;
+            {
+                using FileStream fs = new FileStream("TestData/TypeTemplate/typeInfo.save", FileMode.Open, FileAccess.Read);
+                expected = new byte[(int)fs.Length];
+                fs.Read(expected, 0, expected.Length);
+            }
+
+            TypeInfoSerializer serializer = new TypeInfoSerializer();
+            TypeInfo typeInfo = serializer.Deserialize(expected);
+
+            byte[] actual = serializer.Serialize(typeInfo);
+            SHA256 sha = SHA256.Create();
+            string expectedHash = Convert.ToBase64String(sha.ComputeHash(expected));
+            string actualHash = Convert.ToBase64String(sha.ComputeHash(actual));
+            Assert.AreEqual(expectedHash, actualHash);
         }
     }
 }
