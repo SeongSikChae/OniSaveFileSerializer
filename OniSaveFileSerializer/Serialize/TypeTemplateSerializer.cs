@@ -2,6 +2,60 @@
 {
     using Structure;
 
+    public sealed class TypeTemplatesSerializer : ISaveFileSerializer<TypeTemplates>
+    {
+        public void Initialize(ISaveFileSerializer<TypeTemplate> typeTemplateSerializer)
+        {
+            this.typeTemplateSerializer = typeTemplateSerializer;
+            this.initialized = true;
+        }
+
+        private ISaveFileSerializer<TypeTemplate>? typeTemplateSerializer;
+        private bool initialized;
+
+        public TypeTemplates Deserialize(byte[] buf)
+        {
+            using MemoryStream memory = new MemoryStream(buf);
+            using BinaryReader reader = new BinaryReader(memory);
+            return Deserialize(reader);
+        }
+
+        public TypeTemplates Deserialize(BinaryReader reader)
+        {
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeTemplateSerializer is null)
+                throw new NullReferenceException("typeTemplateSerializer is null");
+            int count = reader.ReadInt32();
+            List<TypeTemplate> list = new List<TypeTemplate>();
+            for (int i = 0; i < count; i++)
+                list.Add(typeTemplateSerializer.Deserialize(reader));
+            return new TypeTemplates
+            {
+                Items = list
+            };
+        }
+
+        public byte[] Serialize(TypeTemplates obj)
+        {
+            using MemoryStream memory = new MemoryStream();
+            using BinaryWriter writer = new BinaryWriter(memory);
+            Serialize(writer, obj);
+            return memory.ToArray();
+        }
+
+        public void Serialize(BinaryWriter writer, TypeTemplates obj)
+        {
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeTemplateSerializer is null)
+                throw new NullReferenceException("typeTemplateSerializer is null");
+            writer.Write(obj.Items.Count);
+            foreach(TypeTemplate item in obj.Items)
+                typeTemplateSerializer.Serialize(writer, item);
+        }
+    }
+
     public sealed class TypeTemplateSerializer : ISaveFileSerializer<TypeTemplate>
     {
         public void Initialize(ISaveFileSerializer<TypeTemplateMember> typeTemplateMemberSerializer)

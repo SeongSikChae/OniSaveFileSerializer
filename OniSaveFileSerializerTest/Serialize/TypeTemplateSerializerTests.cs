@@ -4,7 +4,54 @@ using System.Security.Cryptography;
 namespace OniSaveFileSerializer.Serialize.Tests
 {
     using Structure;
-    using System.Diagnostics.Metrics;
+
+    [TestClass]
+    public class TypeTemplatesSerializerTests
+    {
+        [TestMethod]
+        public void InitializeTest()
+        {
+            TypeTemplatesSerializer serializer = new TypeTemplatesSerializer();
+            Assert.ThrowsException<NotInitializedException>(() =>
+            {
+                serializer.Serialize(new TypeTemplates());
+            });
+        }
+
+        [TestMethod]
+        public void SerializeAndDeserializeTest()
+        {
+            TypeTemplatesSerializer serializer = new TypeTemplatesSerializer();
+            serializer.Initialize(new DummyTypeTemplateMemberSerializer());
+            byte[] block1 = serializer.Serialize(new TypeTemplates());
+
+            TypeTemplates obj = serializer.Deserialize(block1);
+            Assert.AreEqual(0, obj.Items.Count);
+        }
+
+        private sealed class DummyTypeTemplateMemberSerializer : ISaveFileSerializer<TypeTemplate>
+        {
+            public TypeTemplate Deserialize(byte[] buf)
+            {
+                throw new NotImplementedException();
+            }
+
+            public TypeTemplate Deserialize(BinaryReader reader)
+            {
+                throw new NotImplementedException();
+            }
+
+            public byte[] Serialize(TypeTemplate obj)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Serialize(BinaryWriter writer, TypeTemplate obj)
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
 
     [TestClass]
     public class TypeTemplateSerializerTests

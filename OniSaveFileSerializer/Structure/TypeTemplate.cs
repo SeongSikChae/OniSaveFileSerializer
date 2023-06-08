@@ -25,6 +25,11 @@
         }
     }
 
+    public sealed class TypeTemplates : ISaveFile
+    {
+        public List<TypeTemplate> Items = new List<TypeTemplate>();
+    }
+
     public sealed class TypeTemplateMember : ISaveFile
     {
         public string? Name { get; set; }
