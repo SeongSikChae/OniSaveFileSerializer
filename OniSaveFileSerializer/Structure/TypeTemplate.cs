@@ -1,6 +1,6 @@
 ﻿namespace OniSaveFileSerializer.Structure
 {
-    public sealed class TypeTemplate : ISaveFile
+    public sealed class TypeTemplate
     {
         public string? Name { get; set; } = string.Empty;
 
@@ -25,19 +25,19 @@
         }
     }
 
-    public sealed class TypeTemplates : ISaveFile
+    public sealed class TypeTemplates
     {
         public List<TypeTemplate> Items = new List<TypeTemplate>();
     }
 
-    public sealed class TypeTemplateMember : ISaveFile
+    public sealed class TypeTemplateMember
     {
         public string? Name { get; set; }
 
         public TypeInfo? Type { get; set; }
     }
 
-    public sealed class TypeInfo : ISaveFile
+    public sealed class TypeInfo
     {
         public SerializationTypeInfo Info { get; set; }
 

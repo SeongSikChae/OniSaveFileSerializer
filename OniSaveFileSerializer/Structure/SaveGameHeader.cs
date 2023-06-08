@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace OniSaveFileSerializer.Structure
 {
-    public sealed class SaveGameHeader : ISaveFile
+    public sealed class SaveGameHeader
     {
         public uint BuildVersion { get; set; }
 

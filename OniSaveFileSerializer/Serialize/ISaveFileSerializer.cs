@@ -2,7 +2,7 @@
 {
     using Structure;
 
-    public interface ISaveFileSerializer<T> where T : ISaveFile
+    public interface ISaveFileSerializer<T>
     {
         byte[] Serialize(T obj);
 
