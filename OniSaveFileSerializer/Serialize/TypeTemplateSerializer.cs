@@ -4,24 +4,77 @@
 
     public sealed class TypeTemplateSerializer : ISaveFileSerializer<TypeTemplate>
     {
+        public void Initialize(ISaveFileSerializer<TypeTemplateMember> typeTemplateMemberSerializer)
+        {
+            this.typeTemplateMemberSerializer = typeTemplateMemberSerializer;
+            this.initialized = true;
+        }
+
+        private bool initialized = false;
+        private ISaveFileSerializer<TypeTemplateMember>? typeTemplateMemberSerializer;
+
         public TypeTemplate Deserialize(byte[] buf)
         {
-            throw new NotImplementedException();
+            using MemoryStream memory = new MemoryStream(buf);
+            using BinaryReader reader = new BinaryReader(memory);
+            return Deserialize(reader);
         }
 
         public TypeTemplate Deserialize(BinaryReader reader)
         {
-            throw new NotImplementedException();
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeTemplateMemberSerializer is null)
+                throw new NullReferenceException("typeTemplateMemberSerializer is null");
+            string? name = reader.ReadKleiString();
+            name.ValidateDotNetIdentifierName();
+
+            int fieldCount = reader.ReadInt32();
+            int propCount = reader.ReadInt32();
+
+            List<TypeTemplateMember> fieldList = new List<TypeTemplateMember>();
+            for (int i = 0; i < fieldCount; i++)
+            {
+                TypeTemplateMember member = typeTemplateMemberSerializer.Deserialize(reader);
+                fieldList.Add(member);
+            }
+
+            List<TypeTemplateMember> propList = new List<TypeTemplateMember>();
+            for(int i = 0; i < propCount; i++)
+            {
+                TypeTemplateMember member = typeTemplateMemberSerializer.Deserialize(reader);
+                propList.Add(member);
+            }
+
+            return new TypeTemplate
+            {
+                Name = name,
+                Fields = fieldList,
+                Props = propList
+            };
         }
 
         public byte[] Serialize(TypeTemplate obj)
         {
-            throw new NotImplementedException();
+            using MemoryStream memory = new MemoryStream();
+            using BinaryWriter writer = new BinaryWriter(memory);
+            Serialize(writer, obj);
+            return memory.ToArray();
         }
 
         public void Serialize(BinaryWriter writer, TypeTemplate obj)
         {
-            throw new NotImplementedException();
+            if (!initialized)
+                throw new NotInitializedException("require serializer initialize");
+            if (typeTemplateMemberSerializer is null)
+                throw new NullReferenceException("typeTemplateMemberSerializer is null");
+            writer.WriteKleiString(obj.Name);
+            writer.Write(obj.Fields.Count);
+            writer.Write(obj.Props.Count);
+            foreach (TypeTemplateMember member in obj.Fields)
+                typeTemplateMemberSerializer.Serialize(writer, member);
+            foreach (TypeTemplateMember member in obj.Props)
+                typeTemplateMemberSerializer.Serialize(writer, member);
         }
     }
 

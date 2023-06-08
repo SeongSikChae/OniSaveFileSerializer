@@ -4,10 +4,63 @@ using System.Security.Cryptography;
 namespace OniSaveFileSerializer.Serialize.Tests
 {
     using Structure;
+    using System.Diagnostics.Metrics;
 
     [TestClass]
     public class TypeTemplateSerializerTests
     {
+        [TestMethod]
+        public void InitializeTest()
+        {
+            TypeTemplateSerializer serializer = new TypeTemplateSerializer();
+            Assert.ThrowsException<NotInitializedException>(() =>
+            {
+                serializer.Serialize(new TypeTemplate
+                {
+                    Name = "Test"
+                });
+            });
+        }
+
+        [TestMethod]
+        public void SerializeAndDeserializeTest()
+        {
+            TypeTemplateSerializer serializer = new TypeTemplateSerializer();
+            serializer.Initialize(new DummyTypeTemplateMemberSerializer());
+            byte[] block1 = serializer.Serialize(new TypeTemplate
+            { 
+                Name = "Test" 
+            });
+
+            TypeTemplate template = serializer.Deserialize(block1);
+            Assert.IsNotNull(template.Name);
+            Assert.AreEqual("Test", template.Name);
+            Assert.AreEqual(0, template.Fields.Count);
+            Assert.AreEqual(0, template.Props.Count);
+        }
+
+        private sealed class DummyTypeTemplateMemberSerializer : ISaveFileSerializer<TypeTemplateMember>
+        {
+            public TypeTemplateMember Deserialize(byte[] buf)
+            {
+                throw new NotImplementedException();
+            }
+
+            public TypeTemplateMember Deserialize(BinaryReader reader)
+            {
+                throw new NotImplementedException();
+            }
+
+            public byte[] Serialize(TypeTemplateMember obj)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Serialize(BinaryWriter writer, TypeTemplateMember obj)
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 
     [TestClass]
