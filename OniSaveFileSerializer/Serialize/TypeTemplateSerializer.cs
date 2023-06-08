@@ -1,5 +1,6 @@
 ﻿namespace OniSaveFileSerializer.Serialize
 {
+    using Util;
     using Structure;
 
     public sealed class TypeTemplatesSerializer : ISaveFileSerializer<TypeTemplates>
@@ -199,7 +200,7 @@
         public TypeInfo Deserialize(BinaryReader reader)
         {
             SerializationTypeInfo info = (SerializationTypeInfo) reader.ReadByte();
-            SerializationTypeCode code = GetTypeCode(info);
+            SerializationTypeCode code = SerializationTypeUtil.GetTypeCode(info);
 
             string templateName = string.Empty;
             if (code == SerializationTypeCode.UserDefined || code == SerializationTypeCode.Enumeration)
@@ -229,11 +230,6 @@
             };
         }
 
-        private static SerializationTypeCode GetTypeCode(SerializationTypeInfo info)
-        {
-            return (SerializationTypeCode)(info & SerializationTypeInfo.VALUE_MASK);
-        }
-
         public byte[] Serialize(TypeInfo obj)
         {
             using MemoryStream memory = new MemoryStream();
@@ -245,7 +241,7 @@
         public void Serialize(BinaryWriter writer, TypeInfo obj)
         {
             writer.Write((byte)obj.Info);
-            SerializationTypeCode code = GetTypeCode(obj.Info);
+            SerializationTypeCode code = SerializationTypeUtil.GetTypeCode(obj.Info);
             if (code == SerializationTypeCode.UserDefined || code == SerializationTypeCode.Enumeration)
                 writer.WriteKleiString(obj.TemplateName);
             if ((obj.Info & SerializationTypeInfo.IS_GENERIC_TYPE) == SerializationTypeInfo.IS_GENERIC_TYPE)
